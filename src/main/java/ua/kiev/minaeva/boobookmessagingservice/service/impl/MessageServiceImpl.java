@@ -13,7 +13,10 @@ import ua.kiev.minaeva.boobookmessagingservice.mapper.MessageMapper;
 import ua.kiev.minaeva.boobookmessagingservice.repository.MessageRepository;
 import ua.kiev.minaeva.boobookmessagingservice.service.MessageService;
 
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ua.kiev.minaeva.boobookmessagingservice.service.MessageHelper.validateMessageDto;
@@ -35,16 +38,49 @@ public class MessageServiceImpl implements MessageService {
                 .collect(Collectors.toList());
     }
 
-    public List<MessageDto> getUserMessages(String jwt) throws BoobookValidationException, BoobookNotFoundException {
-        ReaderDto readerRequesting = userService.getUserByJwt(jwt);
+    public List<MessageDto> getOwnMessages(String jwt) throws BoobookValidationException {
+        Long currentReaderId = userService.getUserByJwt(jwt).getId();
 
-        Long readerId = readerRequesting.getId();
-        List<Message> readerMessages = messageRepository.findByFromOrTo(readerId, readerId)
-                .orElseThrow(() -> new BoobookNotFoundException("Not any message own be reader with id " + readerId));
+        List<Message> readerMessages = messageRepository.findByFromOrToOrderByDateTimeDesc(currentReaderId, currentReaderId)
+                .orElseGet(LinkedList::new);
 
         return readerMessages.stream()
                 .map(message -> mapper.messageToDto(message))
                 .collect(Collectors.toList());
+    }
+
+    public List<MessageDto> getMessagesWithUser(String jwt, Long readerId) throws BoobookValidationException, BoobookNotFoundException {
+        List<MessageDto> allMessagesOfCurrentUser = getOwnMessages(jwt);
+
+        return allMessagesOfCurrentUser.stream()
+                .filter(messageDto ->
+                        messageDto.getFrom() == readerId || (messageDto.getTo() == readerId))
+                .collect(Collectors.toList());
+    }
+
+    public List<ReaderDto> getConversationalists(String jwt) throws BoobookValidationException, BoobookNotFoundException {
+        Long currentReaderId = userService.getUserByJwt(jwt).getId();
+        List<Message> readerMessages = messageRepository.findByFromOrToOrderByDateTimeDesc(currentReaderId, currentReaderId)
+                .orElseGet(LinkedList::new);
+
+        Set<Long> chronologicalIds = readerMessages.stream()
+                .map(message -> {
+                    /* find the reader currentReader had a chat with */
+                    if (message.getFrom() == currentReaderId) {
+                        return message.getTo();
+                    } else
+                        return message.getFrom();
+                })
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        List<ReaderDto> conversationalists = new LinkedList<>();
+        for (Long id : chronologicalIds) {
+            userService.getUserByID(jwt, id);
+            ReaderDto readerDto = userService.getUserByID(jwt, id);
+            conversationalists.add(readerDto);
+        }
+
+        return conversationalists;
     }
 
     public MessageDto saveMessage(String jwt, MessageDto messageDto) throws BoobookValidationException {

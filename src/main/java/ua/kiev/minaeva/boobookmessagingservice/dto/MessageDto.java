@@ -12,5 +12,6 @@ public class MessageDto {
     private Long to;
     private String message;
     private LocalDateTime dateTime;
+    private String dateTimeString;
 
 }

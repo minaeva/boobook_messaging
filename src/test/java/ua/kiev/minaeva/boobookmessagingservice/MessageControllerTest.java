@@ -62,7 +62,7 @@ public class MessageControllerTest {
 
     @Test
     void getUserMessages() throws Exception {
-        when(messageService.getUserMessages(anyString())).thenReturn(Collections.singletonList(aMessageDto()));
+        when(messageService.getOwnMessages(anyString())).thenReturn(Collections.singletonList(aMessageDto()));
         mockMvc.perform(get("/messages/user")
                 .header(AUTHORIZATION, "Bearer 123"))
                 .andExpect(status().isOk())

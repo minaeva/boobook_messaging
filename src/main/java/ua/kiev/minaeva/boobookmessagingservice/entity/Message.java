@@ -15,8 +15,12 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "from_id")
     private Long from;
+
+    @Column(name = "to_id")
     private Long to;
+
     private String message;
 
     @Column(name = "date_added")

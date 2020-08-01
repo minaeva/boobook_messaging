@@ -7,6 +7,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import ua.kiev.minaeva.boobookmessagingservice.dto.MessageDto;
+import ua.kiev.minaeva.boobookmessagingservice.dto.ReaderDto;
 import ua.kiev.minaeva.boobookmessagingservice.exception.BoobookNotFoundException;
 import ua.kiev.minaeva.boobookmessagingservice.exception.BoobookValidationException;
 import ua.kiev.minaeva.boobookmessagingservice.service.MessageService;
@@ -31,7 +32,7 @@ public class MessageController {
 
     @GetMapping
     public List<MessageDto> getAllMessages(@RequestHeader(AUTHORIZATION) String jwtWithBearer) throws BoobookValidationException {
-        log.info("handling GET ALL MESSAGES request");
+        log.info("MessageService: handling GET ALL MESSAGES request");
         String jwt = getJwtFromString(jwtWithBearer);
 
         return messageService.getAllMessages(jwt);
@@ -39,7 +40,7 @@ public class MessageController {
 
     @MessageMapping("/chat/{to}")
     public void sendMessage(@RequestHeader(AUTHORIZATION) String jwtWithBearer, @DestinationVariable Long to, MessageDto messageDto) throws BoobookValidationException {
-        log.info("handling SEND MESSAGE: " + messageDto + " to: " + to);
+        log.info("MessageService: handling SEND MESSAGE: " + messageDto + " to: " + to);
         String jwt = getJwtFromString(jwtWithBearer);
 
         messageDto.setTo(to);
@@ -47,12 +48,28 @@ public class MessageController {
         simpMessagingTemplate.convertAndSend("/topic/messages/" + to, messageDto);
     }
 
-    @GetMapping("/user")
-    public List<MessageDto> getUserMessages(@RequestHeader(AUTHORIZATION) String jwtWithBearer) throws BoobookValidationException, BoobookNotFoundException {
-        log.info("handling GET USER MESSAGES request");
+    @GetMapping("/conversationalists")
+    public List<ReaderDto> getConversationalists(@RequestHeader(AUTHORIZATION) String jwtWithBearer) throws BoobookValidationException, BoobookNotFoundException {
+        log.info("MessageService: handling GET USER MESSAGES request" + jwtWithBearer);
         String jwt = getJwtFromString(jwtWithBearer);
 
-        return messageService.getUserMessages(jwt);
+        return messageService.getConversationalists(jwt);
+    }
+
+    @GetMapping("/own")
+    public List<MessageDto> getOwnMessages(@RequestHeader(AUTHORIZATION) String jwtWithBearer) throws BoobookValidationException {
+        log.info("MessageService: handling GET USER MESSAGES request" + jwtWithBearer);
+        String jwt = getJwtFromString(jwtWithBearer);
+
+        return messageService.getOwnMessages(jwt);
+    }
+
+    @GetMapping("/withUser/{id}")
+    public List<MessageDto> getMessagesWithUser(@RequestHeader(AUTHORIZATION) String jwtWithBearer, @PathVariable Long id) throws BoobookValidationException, BoobookNotFoundException {
+        log.info("MessageService: handling GET MESSAGES WITH USER id: " + id + ", jwtWithBearer : " + jwtWithBearer);
+        String jwt = getJwtFromString(jwtWithBearer);
+
+        return messageService.getMessagesWithUser(jwt, id);
     }
 
     private String getJwtFromString(String bearer) throws BoobookValidationException {
