@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
+    Optional<LinkedList<Message>> findByFromOrToOrderByDateTimeAsc(Long id1, Long id2);
+
     Optional<LinkedList<Message>> findByFromOrToOrderByDateTimeDesc(Long id1, Long id2);
 
 }

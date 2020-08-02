@@ -13,5 +13,6 @@ public class MessageDto {
     private String message;
     private LocalDateTime dateTime;
     private String dateTimeString;
+    private String authToken;
 
 }

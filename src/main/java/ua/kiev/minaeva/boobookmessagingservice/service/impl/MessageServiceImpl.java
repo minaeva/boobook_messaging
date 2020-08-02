@@ -41,7 +41,7 @@ public class MessageServiceImpl implements MessageService {
     public List<MessageDto> getOwnMessages(String jwt) throws BoobookValidationException {
         Long currentReaderId = userService.getUserByJwt(jwt).getId();
 
-        List<Message> readerMessages = messageRepository.findByFromOrToOrderByDateTimeDesc(currentReaderId, currentReaderId)
+        List<Message> readerMessages = messageRepository.findByFromOrToOrderByDateTimeAsc(currentReaderId, currentReaderId)
                 .orElseGet(LinkedList::new);
 
         return readerMessages.stream()

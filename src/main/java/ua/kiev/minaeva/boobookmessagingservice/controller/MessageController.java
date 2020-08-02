@@ -39,18 +39,17 @@ public class MessageController {
     }
 
     @MessageMapping("/chat/{to}")
-    public void sendMessage(@RequestHeader(AUTHORIZATION) String jwtWithBearer, @DestinationVariable Long to, MessageDto messageDto) throws BoobookValidationException {
-        log.info("MessageService: handling SEND MESSAGE: " + messageDto + " to: " + to);
-        String jwt = getJwtFromString(jwtWithBearer);
+    public void sendMessage(@DestinationVariable Long to, MessageDto messageDto) throws BoobookValidationException {
+        log.info("MessageService: handling SEND MESSAGE || messageDto: " + messageDto + " to: " + to);
 
         messageDto.setTo(to);
-        messageService.saveMessage(jwt, messageDto);
-        simpMessagingTemplate.convertAndSend("/topic/messages/" + to, messageDto);
+        MessageDto savedMessage = messageService.saveMessage(messageDto.getAuthToken(), messageDto);
+        simpMessagingTemplate.convertAndSend("/topic/messages/" + to, savedMessage);
     }
 
     @GetMapping("/conversationalists")
     public List<ReaderDto> getConversationalists(@RequestHeader(AUTHORIZATION) String jwtWithBearer) throws BoobookValidationException, BoobookNotFoundException {
-        log.info("MessageService: handling GET USER MESSAGES request" + jwtWithBearer);
+        log.info("MessageService: handling GET USER MESSAGES || jwtWithBearer: " + jwtWithBearer);
         String jwt = getJwtFromString(jwtWithBearer);
 
         return messageService.getConversationalists(jwt);
