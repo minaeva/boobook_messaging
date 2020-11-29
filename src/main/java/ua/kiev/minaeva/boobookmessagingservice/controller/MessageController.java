@@ -16,6 +16,7 @@ import java.util.List;
 
 import static org.springframework.util.StringUtils.hasText;
 
+//comment
 @RestController
 @Log
 @RequestMapping("/messages")
