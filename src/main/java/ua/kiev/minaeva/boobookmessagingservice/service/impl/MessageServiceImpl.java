@@ -1,6 +1,7 @@
 package ua.kiev.minaeva.boobookmessagingservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 import ua.kiev.minaeva.boobookmessagingservice.client.UserService;
@@ -23,6 +24,7 @@ import static ua.kiev.minaeva.boobookmessagingservice.service.MessageHelper.vali
 
 @Service
 @RequiredArgsConstructor
+@Log
 public class MessageServiceImpl implements MessageService {
 
     private final MessageRepository messageRepository;
@@ -75,9 +77,12 @@ public class MessageServiceImpl implements MessageService {
 
         List<ReaderDto> conversationalists = new LinkedList<>();
         for (Long id : chronologicalIds) {
-            userService.getUserByID(jwt, id);
-            ReaderDto readerDto = userService.getUserByID(jwt, id);
-            conversationalists.add(readerDto);
+            try {
+                ReaderDto readerDto = userService.getUserByID(jwt, id);
+                conversationalists.add(readerDto);
+            } catch (BoobookNotFoundException e) {
+                log.warning("User with id " + id + " not found: " + e.getMessage());
+            }
         }
 
         return conversationalists;
