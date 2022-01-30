@@ -20,4 +20,4 @@ VALUES (1, 2, current_timestamp, 'message 1'),
        (1, 2, current_timestamp, 'message 3'),
        (1, 3, current_timestamp, 'message 4'),
        (4, 2, current_timestamp, 'message 5'),
-       (4, 1, current_timestamp, 'message 6')
+       (4, 1, current_timestamp, 'message 6');
