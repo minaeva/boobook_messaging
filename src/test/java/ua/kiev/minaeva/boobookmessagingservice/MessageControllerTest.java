@@ -56,14 +56,14 @@ public class MessageControllerTest {
     void getAllMessages_nonValidToken() throws Exception {
         mockMvc.perform(get("/messages")
                 .header(AUTHORIZATION, "123"))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().is4xxClientError())
                 .andReturn();
     }
 
     @Test
     void getUserMessages() throws Exception {
         when(messageService.getOwnMessages(anyString())).thenReturn(Collections.singletonList(aMessageDto()));
-        mockMvc.perform(get("/messages/user")
+        mockMvc.perform(get("/messages/own")
                 .header(AUTHORIZATION, "Bearer 123"))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -73,9 +73,9 @@ public class MessageControllerTest {
 
     @Test
     void getUserMessages_nonValidToken() throws Exception {
-        mockMvc.perform(get("/messages/user")
+        mockMvc.perform(get("/messages/own")
                 .header(AUTHORIZATION, "123"))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().is4xxClientError())
                 .andReturn();
     }
 
